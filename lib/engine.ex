@@ -48,14 +48,19 @@ defmodule Exchange.Engine do
       nil ->
         {entries, order}
 
-      {price, size, _orders} ->
+      {price, size, orders} ->
         if matching?(price, order) do
           cond do
             order.size > size ->
-              {rest(entries), Map.put(order, :size, order.size - size)}
+              match_order(rest(entries), Map.put(order, :size, order.size - size))
 
             order.size < size ->
-              {rest(entries), Map.put(order, :size, 0)}
+              {orders, _} = Enum.map_reduce(orders, order.size, fn(order, size) ->
+                {Map.put(order, :size, order.size - size), order.size - size}
+              end)
+              orders_size = Enum.map(orders, fn(%{size: size}) -> size end) |> Enum.sum()
+              entries = [{price, orders_size, orders} | rest(entries)]
+              {entries, Map.put(order, :size, 0)}
 
             order.size == size ->
               {rest(entries), Map.put(order, :size, 0)}

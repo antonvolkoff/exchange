@@ -146,8 +146,63 @@ defmodule Exchange.EngineTest do
     Engine.add(engine, %{side: :buy, size: 350, price: 58_00})
 
     {buy, sell} = Engine.book(engine)
-    assert [{58_00, [%{size: 50}]}, {54_00, _}, {53_00, _}] = buy
+    assert [{58_00, 50, [%{size: 50}]}, {54_00, 100, _}, {53_00, 200, _}] = buy
     assert [] = sell
+  end
+
+  test "matching a sell order large enough to clear the buy book" do
+    {:ok, engine} = Engine.start_link(:test)
+    init_orders!(engine)
+
+    Engine.add(engine, %{side: :sell, size: 350, price: 53_00})
+
+    {buy, sell} = Engine.book(engine)
+    assert [] = buy
+    assert [{53_00, 50, _}, {57_00, 100, _}, {58_00, 200, _}] = sell
+  end
+
+  test "matching a large buy order partially" do
+    {:ok, engine} = Engine.start_link(:test)
+    init_orders!(engine)
+
+    Engine.add(engine, %{side: :buy, size: 350, price: 57_00})
+
+    {buy, sell} = Engine.book(engine)
+    assert [{57_00, 250, _}, {54_00, 100, _}, {53_00, 200, _}] = buy
+    assert [{58_00, 200, _}] = sell
+  end
+
+  test "matching a large sell order partially" do
+    {:ok, engine} = Engine.start_link(:test)
+    init_orders!(engine)
+
+    Engine.add(engine, %{side: :sell, size: 350, price: 54_00})
+
+    {buy, sell} = Engine.book(engine)
+    assert [{53_00, 200, _}] = buy
+    assert [{54_00, 250, _}, {57_00, 100, _}, {58_00, 200, _}] = sell
+  end
+
+  test "matching a small buy order" do
+    {:ok, engine} = Engine.start_link(:test)
+    init_orders!(engine)
+
+    Engine.add(engine, %{side: :buy, size: 50, price: 57_00})
+
+    {buy, sell} = Engine.book(engine)
+    assert [{54_00, 100, _}, {53_00, 200, _}] = buy
+    assert [{57_00, 50, [%{size: 50}]}, {58_00, 200, _}] = sell
+  end
+
+  test "matching a small sell order" do
+    {:ok, engine} = Engine.start_link(:test)
+    init_orders!(engine)
+
+    Engine.add(engine, %{side: :sell, size: 50, price: 54_00})
+
+    {buy, sell} = Engine.book(engine)
+    assert [{54_00, 50, [%{size: 50}]}, {53_00, 200, _}] = buy
+    assert [{57_00, 100, _}, {58_00, 200, _}] = sell
   end
 
   def init_orders!(engine) do
