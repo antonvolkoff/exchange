@@ -48,9 +48,19 @@ defmodule Exchange.Engine do
       nil ->
         {entries, order}
 
-      {price, _size, _orders} ->
+      {price, size, _orders} ->
         if matching?(price, order) do
-          {rest(entries), Map.put(order, :size, 0)}
+          cond do
+            order.size > size ->
+              {rest(entries), Map.put(order, :size, order.size - size)}
+
+            order.size < size ->
+              {rest(entries), Map.put(order, :size, 0)}
+
+            order.size == size ->
+              {rest(entries), Map.put(order, :size, 0)}
+          end
+
         else
           {entries, order}
         end
