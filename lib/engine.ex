@@ -43,6 +43,7 @@ defmodule Exchange.Engine do
     {buy_side, sell_side}
   end
 
+  def match_order(entries, %{size: 0} = order), do: {entries, order}
   def match_order(entries, order) do
     case top(entries) do
       nil ->
@@ -51,19 +52,15 @@ defmodule Exchange.Engine do
       {price, size, orders} ->
         if matching?(price, order) do
           cond do
-            order.size > size ->
-              match_order(rest(entries), Map.put(order, :size, order.size - size))
-
             order.size < size ->
               {orders, _} = Enum.map_reduce(orders, order.size, fn(order, size) ->
-                {Map.put(order, :size, order.size - size), order.size - size}
+                {fill_order(order, size), order.size - size}
               end)
-              orders_size = Enum.map(orders, fn(%{size: size}) -> size end) |> Enum.sum()
-              entries = [{price, orders_size, orders} | rest(entries)]
+              entries = [{price, total_size(orders), orders} | rest(entries)]
               {entries, Map.put(order, :size, 0)}
 
-            order.size == size ->
-              {rest(entries), Map.put(order, :size, 0)}
+            true ->
+              match_order(rest(entries), fill_order(order, size))
           end
 
         else
@@ -117,4 +114,8 @@ defmodule Exchange.Engine do
   defp matching?(price, %{side: :sell, price: order_price}) do
     price >= order_price
   end
+
+  defp fill_order(order, fill_size), do: Map.put(order, :size, order.size - fill_size)
+
+  defp total_size(orders), do: orders |> Enum.map(&(&1.size)) |> Enum.sum()
 end
