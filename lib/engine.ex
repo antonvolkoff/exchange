@@ -48,7 +48,7 @@ defmodule Exchange.Engine do
       nil ->
         {entries, order}
 
-      {price, _orders} ->
+      {price, _size, _orders} ->
         if matching?(price, order) do
           {rest(entries), Map.put(order, :size, 0)}
         else
@@ -59,10 +59,7 @@ defmodule Exchange.Engine do
 
   def add_order(entries, %{size: 0}), do: entries
   def add_order(entries, %{size: size} = order) when size > 0 do
-    entry =
-      entries
-      |> find_entry(order)
-      |> put_order(order)
+    entry = entries |> find_entry(order) |> put_order(order)
 
     entries = entries |> put_entry(entry)
 
@@ -73,12 +70,14 @@ defmodule Exchange.Engine do
   end
 
   defp find_entry(entries, %{price: price}) do
-    List.keyfind(entries, price, 0, {price, []})
+    List.keyfind(entries, price, 0, {price, 0, []})
   end
 
-  defp put_order({price, orders}, order), do: {price, [order | orders]}
+  defp put_order({price, size, orders}, order) do
+    {price, size + order.size, [order | orders]}
+  end
 
-  defp put_entry(entires, {price, _} = entry) do
+  defp put_entry(entires, {price, _, _} = entry) do
     if List.keymember?(entires, price, 0) do
       List.keyreplace(entires, price, 0, entry)
     else
@@ -92,10 +91,9 @@ defmodule Exchange.Engine do
   defp rest([_ | r]),    do: r
   defp rest([]),         do: []
 
+  defp sell_book_sort({p1, _, _}, {p2, _, _}), do: p1 < p2
 
-  defp sell_book_sort({p1, _}, {p2, _}), do: p1 < p2
-
-  defp buy_book_sort({p1, _}, {p2, _}), do: p1 > p2
+  defp buy_book_sort({p1, _, _}, {p2, _, _}), do: p1 > p2
 
   defp matching?(price, %{side: :buy, price: order_price}) do
     price <= order_price
