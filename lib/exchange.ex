@@ -9,6 +9,7 @@ defmodule Exchange do
     # Define workers and child supervisors to be supervised
     children = [
       # Starts a worker by calling: Exchange.Worker.start_link(arg1, arg2, arg3)
+      worker(Exchange.ID, []),
       worker(Exchange.Engine, [Exchange.Engine]),
     ]
 
