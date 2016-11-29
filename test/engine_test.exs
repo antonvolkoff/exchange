@@ -5,7 +5,7 @@ defmodule Exchange.EngineTest do
 
   test "add a single buy order to the order book" do
     {:ok, engine} = Engine.start_link(:test)
-    order = %{side: :buy, size: 100, price: 50_00}
+    order = %{id: "a", side: :buy, size: 100, price: 50_00}
 
     Engine.add(engine, order)
 
@@ -15,8 +15,8 @@ defmodule Exchange.EngineTest do
 
   test "add two buy orders, with higher order first" do
     {:ok, engine} = Engine.start_link(:test)
-    order_1 = %{side: :buy, size: 100, price: 51_00}
-    order_2 = %{side: :buy, size: 100, price: 50_00}
+    order_1 = %{id: "a", side: :buy, size: 100, price: 51_00}
+    order_2 = %{id: "b", side: :buy, size: 100, price: 50_00}
 
     Engine.add(engine, order_1)
     Engine.add(engine, order_2)
@@ -27,8 +27,8 @@ defmodule Exchange.EngineTest do
 
   test "add two buy orders, with lower order first" do
     {:ok, engine} = Engine.start_link(:test)
-    order_1 = %{side: :buy, size: 100, price: 51_00}
-    order_2 = %{side: :buy, size: 100, price: 50_00}
+    order_1 = %{id: "a", side: :buy, size: 100, price: 51_00}
+    order_2 = %{id: "b", side: :buy, size: 100, price: 50_00}
 
     Engine.add(engine, order_2)
     Engine.add(engine, order_1)
@@ -39,8 +39,8 @@ defmodule Exchange.EngineTest do
 
   test "add two buy orders with the same price" do
     {:ok, engine} = Engine.start_link(:test)
-    order_1 = %{side: :buy, size: 100, price: 50_00}
-    order_2 = %{side: :buy, size: 100, price: 50_00}
+    order_1 = %{id: "a", side: :buy, size: 100, price: 50_00}
+    order_2 = %{id: "b", side: :buy, size: 100, price: 50_00}
 
     Engine.add(engine, order_1)
     Engine.add(engine, order_2)
@@ -51,7 +51,7 @@ defmodule Exchange.EngineTest do
 
   test "add a single sell limit order to order book" do
     {:ok, engine} = Engine.start_link(:test)
-    order = %{side: :sell, size: 100, price: 50_00}
+    order = %{id: "a", side: :sell, size: 100, price: 50_00}
 
     Engine.add(engine, order)
 
@@ -61,8 +61,8 @@ defmodule Exchange.EngineTest do
 
   test "add two sell orders, with higher order first" do
     {:ok, engine} = Engine.start_link(:test)
-    order_1 = %{side: :sell, size: 100, price: 51_00}
-    order_2 = %{side: :sell, size: 100, price: 50_00}
+    order_1 = %{id: "a", side: :sell, size: 100, price: 51_00}
+    order_2 = %{id: "b", side: :sell, size: 100, price: 50_00}
 
     Engine.add(engine, order_1)
     Engine.add(engine, order_2)
@@ -73,8 +73,8 @@ defmodule Exchange.EngineTest do
 
   test "add two sell orders, with lower order first" do
     {:ok, engine} = Engine.start_link(:test)
-    order_1 = %{side: :sell, size: 100, price: 51_00}
-    order_2 = %{side: :sell, size: 100, price: 50_00}
+    order_1 = %{id: "a", side: :sell, size: 100, price: 51_00}
+    order_2 = %{id: "b", side: :sell, size: 100, price: 50_00}
 
     Engine.add(engine, order_2)
     Engine.add(engine, order_1)
@@ -85,8 +85,8 @@ defmodule Exchange.EngineTest do
 
   test "add two sell orders with the same price" do
     {:ok, engine} = Engine.start_link(:test)
-    order_1 = %{side: :sell, size: 100, price: 50_00}
-    order_2 = %{side: :sell, size: 100, price: 50_00}
+    order_1 = %{id: "a", side: :sell, size: 100, price: 50_00}
+    order_2 = %{id: "b", side: :sell, size: 100, price: 50_00}
 
     Engine.add(engine, order_1)
     Engine.add(engine, order_2)

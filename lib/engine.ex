@@ -22,7 +22,8 @@ defmodule Exchange.Engine do
   end
 
   def handle_cast({:add, order}, books) do
-    {:noreply, handle_add_order(books, order)}
+    books = handle_add_order(books, add_id(order))
+    {:noreply, books}
   end
 
   def handle_call(:book, _, books) do
@@ -86,7 +87,7 @@ defmodule Exchange.Engine do
   end
 
   defp put_order({price, size, orders}, order) do
-    {price, size + order.size, [order | orders]}
+    {price, size + order.size, orders ++ [order]}
   end
 
   defp put_entry(entires, {price, _, _} = entry) do
@@ -118,4 +119,7 @@ defmodule Exchange.Engine do
   defp fill_order(order, fill_size), do: Map.put(order, :size, order.size - fill_size)
 
   defp total_size(orders), do: orders |> Enum.map(&(&1.size)) |> Enum.sum()
+
+  defp add_id(%{id: _} = order), do: order
+  defp add_id(order), do: Map.put(order, :id, Exchange.ID.get())
 end
