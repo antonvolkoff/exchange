@@ -9,7 +9,7 @@ defmodule Exchange do
     # Define workers and child supervisors to be supervised
     children = [
       # Starts a worker by calling: Exchange.Worker.start_link(arg1, arg2, arg3)
-      # worker(Exchange.Worker, [arg1, arg2, arg3]),
+      worker(Exchange.Engine, [Exchange.Engine]),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -17,4 +17,8 @@ defmodule Exchange do
     opts = [strategy: :one_for_one, name: Exchange.Supervisor]
     Supervisor.start_link(children, opts)
   end
+
+  def add(order), do: Exchange.Engine.add(Exchange.Engine, order)
+
+  def book, do: Exchange.Engine.book(Exchange.Engine)
 end
