@@ -1,25 +1,19 @@
 defmodule Exchange do
-  use Application
+  @moduledoc """
+  Documentation for Exchange.
+  """
 
-  # See http://elixir-lang.org/docs/stable/elixir/Application.html
-  # for more information on OTP Applications
-  def start(_type, _args) do
-    import Supervisor.Spec, warn: false
-
-    # Define workers and child supervisors to be supervised
-    children = [
-      # Starts a worker by calling: Exchange.Worker.start_link(arg1, arg2, arg3)
-      worker(Exchange.ID, []),
-      worker(Exchange.Engine, [Exchange.Engine]),
-    ]
-
-    # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Exchange.Supervisor]
-    Supervisor.start_link(children, opts)
+  @doc """
+  Adds an order to the order book.
+  """
+  def add(order) do
+    Exchange.Engine.add(Exchange.Engine, order)
   end
 
-  def add(order), do: Exchange.Engine.add(Exchange.Engine, order)
-
-  def book, do: Exchange.Engine.book(Exchange.Engine)
+  @doc """
+  Returns current order book depth.
+  """
+  def book do
+    Exchange.Engine.book(Exchange.Engine)
+  end
 end
